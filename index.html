@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Family Shopping List</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playwrite+US+Modern:wght@100..400&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="login-box">
+      <div class="modal">
+        <h3 class="login-title">Login</h3>
+        <div class="modal-input-container">
+          <div class="input-container">
+            <input type="email" placeholder="Email Address" />
+          </div>
+          <div class="input-container">
+            <input type="text" placeholder="Password" />
+          </div>
+          <div class="button-container">
+            <button onclick="login()">Login</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="shopping-app">
+        <div class="user-login-container">
+          <p class="login-link">Login</p>
+          <p class="logout-link">Logout</p>
+        </div>
+        <h2>
+          Shopping List
+          <img src="/icons/checklist.png" alt="" />
+        </h2>
+        <div class="row">
+          <div class="input-container">
+            <input type="text" id="item-box" placeholder="Item to buy" />
+          </div>
+          <div class="input-container">
+            <input
+              type="text"
+              id="quantity-box"
+              placeholder="Quantity to buy"
+            />
+          </div>
+          <div class="button-container">
+            <button onclick="addTask()">Add</button>
+          </div>
+        </div>
+
+        <ul class="list-container" id="list-container">
+          <!-- <li class="checked">JavaScript Course</li>
+          <li class="checked">Weather App</li>
+          <li>To-Do List</li> -->
+        </ul>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+  <footer>
+    <a
+      href="https://www.flaticon.com/free-icons/checklist"
+      title="checklist icons"
+      >Icons created by Freepik - Flaticon</a
+    >
+  </footer>
+</html>

@@ -1,0 +1,192 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #222;
+  font-family: "Playwrite US Modern", cursive;
+  font-optical-sizing: auto;
+  font-weight: 100;
+  font-style: normal;
+}
+
+footer {
+  position: fixed;
+  bottom: 0;
+  right: 10px;
+}
+
+footer a {
+  color: lightgrey;
+}
+
+.login-box {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background-color: rgba(0, 0, 0, 0.75);
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.modal {
+  background-color: white;
+  margin: 15% auto;
+  width: 450px;
+  padding: 15px;
+  border-radius: 5px;
+  z-index: 1;
+}
+
+.user-login-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.login-title {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  color: black;
+}
+.login-link {
+  color: white;
+  cursor: pointer;
+}
+
+.login-link:hover {
+  color: darkorange;
+}
+
+.shopping-app {
+  width: 100%;
+  max-width: 600px;
+  background: linear-gradient(135deg, #5b548a, #301934);
+  margin: 100px auto 20px;
+  padding: 40px 30px 70px;
+  border-radius: 10px;
+}
+
+.shopping-app h2 {
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.list-container {
+  margin-top: 6px;
+  padding-right: 5px;
+}
+
+.shopping-app h2 img {
+  width: 30px;
+  margin-left: 10px;
+}
+
+/* .row {
+  display: flex;
+  align-items: center;
+  border-radius: 30px;
+  background: lightgray;
+  padding-left: 20px;
+  margin-bottom: 20px; */
+/* flex-direction: column;
+} */
+
+.input-container {
+  display: flex;
+  align-items: center;
+  border-radius: 30px;
+  background: lightgray;
+  padding-left: 20px;
+  margin-bottom: 20px;
+}
+
+input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 10px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+}
+
+button {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  border: none;
+  outline: none;
+  padding: 10px;
+  background: rgb(0, 119, 255);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 40px;
+}
+
+ul li {
+  list-style: none;
+  font-size: 16px;
+  padding: 12px 8px 12px 50px;
+  user-select: none;
+  cursor: pointer;
+  position: relative;
+  color: white;
+  align-items: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+ul li::before {
+  content: "";
+  position: absolute;
+  height: 24px;
+  width: 24px;
+  background-image: url(icons/unchecked.png);
+  background-size: cover;
+  background-position: center;
+  left: 9px;
+  top: 14px;
+}
+
+ul li.checked {
+  text-decoration: line-through;
+  color: #726f6f;
+}
+
+ul li.checked::before {
+  background-image: url(icons/checked.png);
+  height: 30px;
+  width: 30px;
+  left: 6px;
+  top: 12px;
+}
+
+ul li quantity {
+  display: flex;
+  align-self: center;
+  justify-self: center;
+}
+
+ul li close {
+  position: absolute;
+  display: flex;
+  justify-self: right;
+  font-size: 22px;
+}
+
+ul li close:hover {
+  color: darkred;
+}
