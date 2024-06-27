@@ -23,24 +23,29 @@ footer a {
 }
 
 .login-box {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  display: none;
+}
+
+.login-box.show {
+  display: block;
+  /* justify-content: center; */
+  /* align-items: flex-start; */
   background-color: rgba(0, 0, 0, 0.75);
   position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
+  z-index: 999;
 }
 
 .modal {
-  background-color: white;
+  background-color: lightslategray;
   margin: 15% auto;
   width: 450px;
   padding: 15px;
-  border-radius: 5px;
-  z-index: 1;
+  border-radius: 10px;
+  z-index: 1000;
 }
 
 .user-login-container {
@@ -54,13 +59,34 @@ footer a {
   margin-bottom: 20px;
   color: black;
 }
-.login-link {
+.login-link,
+.logout-link {
   color: white;
   cursor: pointer;
 }
 
-.login-link:hover {
+.logout-link {
+  display: none;
+  z-index: -100;
+}
+
+.logout-link.show {
+  display: flex;
+  z-index: 1;
+}
+
+.login-link.hide {
+  display: none;
+  z-index: -100;
+}
+
+.login-link:hover,
+.logout-link:hover {
   color: darkorange;
+}
+
+.user-name.show {
+  color: darkkhaki;
 }
 
 .shopping-app {
@@ -136,57 +162,80 @@ button {
   border-radius: 40px;
 }
 
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
 ul li {
-  list-style: none;
+  position: relative;
   font-size: 16px;
-  padding: 12px 8px 12px 50px;
+  padding: 12px 8px;
   user-select: none;
   cursor: pointer;
-  position: relative;
   color: white;
-  align-items: center;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  /* grid-template-columns: auto 3fr 1fr 1fr auto; */
+  grid-template-columns: auto 3fr 1fr 1fr;
+  align-items: center;
+  justify-items: start;
+  white-space: nowrap;
+  gap: 10px;
 }
 
 ul li::before {
   content: "";
-  position: absolute;
   height: 24px;
   width: 24px;
   background-image: url(icons/unchecked.png);
   background-size: cover;
   background-position: center;
-  left: 9px;
-  top: 14px;
-}
-
-ul li.checked {
-  text-decoration: line-through;
-  color: #726f6f;
+  align-self: center;
 }
 
 ul li.checked::before {
   background-image: url(icons/checked.png);
-  height: 30px;
-  width: 30px;
-  left: 6px;
-  top: 12px;
 }
 
-ul li quantity {
-  display: flex;
-  align-self: center;
-  justify-self: center;
+ul li.checked {
+  grid-template-columns: auto 3fr 1fr 1fr auto;
 }
 
-ul li close {
-  position: absolute;
-  display: flex;
-  justify-self: right;
-  font-size: 22px;
+ul li.checked .item,
+ul li.checked .quantity,
+ul li.checked .user {
+  text-decoration: line-through;
+  color: #726f6f;
 }
 
-ul li close:hover {
+ul li.checked .quantity {
+  padding-left: 16px;
+}
+
+ul li.checked .user {
+  padding-left: 20px;
+}
+
+.quantity,
+.user {
+  white-space: nowrap;
+}
+
+.close {
+  font-size: 20px;
+  justify-self: end;
+  cursor: pointer;
+  transform: scale(1.5);
+  display: none;
+  z-index: -100;
+}
+
+.checked .close:hover {
   color: darkred;
+}
+
+li.checked .close {
+  display: inline-flex;
+  color: white;
+  z-index: 1;
 }

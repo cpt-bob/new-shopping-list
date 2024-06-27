@@ -13,18 +13,18 @@
     />
   </head>
   <body>
-    <div class="login-box">
+    <div id="login-box" class="login-box">
       <div class="modal">
         <h3 class="login-title">Login</h3>
         <div class="modal-input-container">
           <div class="input-container">
-            <input type="email" placeholder="Email Address" />
+            <input id="email" type="email" placeholder="Email Address" />
           </div>
           <div class="input-container">
-            <input type="text" placeholder="Password" />
+            <input type="password" placeholder="Password" />
           </div>
           <div class="button-container">
-            <button onclick="login()">Login</button>
+            <button class="js-login-button">Login</button>
           </div>
         </div>
       </div>
@@ -32,8 +32,9 @@
     <div class="container">
       <div class="shopping-app">
         <div class="user-login-container">
-          <p class="login-link">Login</p>
-          <p class="logout-link">Logout</p>
+          <p id="login-link" class="login-link js-login-link">Login</p>
+          <p id="user-name" class="user-name js-user-name"></p>
+          <p id="logout-link" class="logout-link js-logout-link">Logout</p>
         </div>
         <h2>
           Shopping List
@@ -56,9 +57,7 @@
         </div>
 
         <ul class="list-container" id="list-container">
-          <!-- <li class="checked">JavaScript Course</li>
-          <li class="checked">Weather App</li>
-          <li>To-Do List</li> -->
+          <!-- List items will go here -->
         </ul>
       </div>
     </div>
