@@ -88,7 +88,7 @@ function addTask() {
 }
 
 document.querySelector(".js-add-button").addEventListener("click", () => {
-  addTask():
+  addTask();
 });
 
 listContainer.addEventListener(
