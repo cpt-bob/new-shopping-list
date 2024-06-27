@@ -87,6 +87,10 @@ function addTask() {
   saveData();
 }
 
+document.querySelector(".js-add-button").addEventListener("click", () => {
+  addTask():
+});
+
 listContainer.addEventListener(
   "click",
   function (event) {
