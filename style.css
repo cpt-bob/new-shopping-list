@@ -28,8 +28,6 @@ footer a {
 
 .login-box.show {
   display: block;
-  /* justify-content: center; */
-  /* align-items: flex-start; */
   background-color: rgba(0, 0, 0, 0.75);
   position: fixed;
   top: 0;
@@ -116,16 +114,6 @@ footer a {
   margin-left: 10px;
 }
 
-/* .row {
-  display: flex;
-  align-items: center;
-  border-radius: 30px;
-  background: lightgray;
-  padding-left: 20px;
-  margin-bottom: 20px; */
-/* flex-direction: column;
-} */
-
 .input-container {
   display: flex;
   align-items: center;
@@ -175,8 +163,7 @@ ul li {
   cursor: pointer;
   color: white;
   display: grid;
-  /* grid-template-columns: auto 3fr 1fr 1fr auto; */
-  grid-template-columns: auto 3fr 1fr 1fr;
+  grid-template-columns: auto 3fr 2fr 1fr;
   align-items: center;
   justify-items: start;
   white-space: nowrap;
@@ -198,7 +185,7 @@ ul li.checked::before {
 }
 
 ul li.checked {
-  grid-template-columns: auto 3fr 1fr 1fr auto;
+  grid-template-columns: auto 3fr 2fr 1fr auto;
 }
 
 ul li.checked .item,
