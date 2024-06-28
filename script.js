@@ -61,31 +61,39 @@ function addTask() {
   if (itemBox.value === "" || quantityBox.value === "") {
     alert("Please enter the missing item or quantity");
     return;
-  } else {
-    let li = document.createElement("li");
-    let item = document.createElement("item");
-    item.innerHTML = itemBox.value;
-    item.classList.add("item");
-    li.appendChild(item);
-    listContainer.appendChild(li);
-    let quantity = document.createElement("quantity");
-    quantity.innerHTML = quantityBox.value;
-    quantity.classList.add("quantity");
-    li.appendChild(quantity);
-    let user = document.createElement("user");
-    user.innerHTML = `${userName}`;
-    user.classList.add("user");
-    li.appendChild(user);
-    let close = document.createElement("close");
-    close.innerHTML = "&#215;";
-    close.classList.add("close");
-    li.appendChild(close);
   }
-  itemBox.value = "";
-  quantityBox.value = "";
-  itemBox.focus();
-  saveData();
+  // create li for future list items
+  let li = document.createElement("li");
+  listContainer.appendChild(li);
+
+  // create item for the list and add
+  let item = document.createElement("span");
+  item.classList.add("item");
+  item.innerHTML = itemBox.value;
+  li.appendChild(item);
+
+  // create quantity for the list and add
+  let quantity = document.createElement("span");
+  quantity.classList.add("quantity");
+  quantity.innerHTML = quantityBox.value;
+  li.appendChild(quantity);
+
+  // create user for the list and add from login
+  let user = document.createElement("span");
+  user.classList.add("user");
+  user.innerHTML = `${userName}`;
+  li.appendChild(user);
+
+  // create close "X" to remove the selected li from the list
+  let close = document.createElement("span");
+  close.classList.add("close");
+  close.innerHTML = "&#215;";
+  li.appendChild(close);
 }
+itemBox.value = "";
+quantityBox.value = "";
+itemBox.focus();
+saveData();
 
 document.querySelector(".js-add-button").addEventListener("click", () => {
   addTask();
