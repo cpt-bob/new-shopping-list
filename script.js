@@ -3,9 +3,8 @@ import {
   getDatabase,
   ref,
   push,
-  onChildAdded,
-  remove,
-  child,
+  onValue,
+  set,
 } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-database.js";
 import {
   getAuth,
@@ -183,6 +182,7 @@ const logout = () => {
 //   login();
 // });
 
+// event listener for the login popup
 document.querySelector(".js-login-link").addEventListener("click", () => {
   const loginBox = document.getElementById("login-box");
   const email = document.getElementById("email");
@@ -190,59 +190,146 @@ document.querySelector(".js-login-link").addEventListener("click", () => {
   email.focus();
 });
 
+// event listener for the logout link
 document.querySelector(".js-logout-link").addEventListener("click", () => {
   logout();
 });
 
-// function to add the items to the list
-function addTask() {
+const createShoppingListElement = (item, quantity, userName) => {
+  const li = document.createElement("li");
+
+  const itemElement = document.createElement("span");
+  itemElement.classList.add("item");
+  itemElement.textContent = item;
+  li.appendChild(itemElement);
+
+  const quantityElement = document.createElement("span");
+  quantityElement.classList.add("quantity");
+  quantityElement.textContent = quantity;
+  li.appendChild(quantityElement);
+
+  const userElement = document.createElement("span");
+  userElement.classList.add("user");
+  userElement.textContent = userName;
+  li.appendChild(userElement);
+
+  const closeElement = document.createElement("span");
+  closeElement.classList.add("close");
+  closeElement.innerHTML = "&#215;";
+  li.appendChild(closeElement);
+
+  return li;
+};
+
+function addToList() {
   const userName = getUserName();
 
   if (itemBox.value === "" || quantityBox.value === "") {
     alert("Please enter the missing item or quantity");
     return;
   }
-  {
-    // create li for future list items
-    const li = document.createElement("li");
 
-    // create item for the list and add
-    const item = document.createElement("span");
-    item.classList.add("item");
-    item.innerHTML = itemBox.value;
-    li.appendChild(item);
+  const shoppingElement = createShoppingListElement(
+    itemBox.value,
+    quantityBox.value,
+    userName
+  );
 
-    // create quantity for the list and add
-    const quantity = document.createElement("span");
-    quantity.classList.add("quantity");
-    quantity.innerHTML = quantityBox.value;
-    li.appendChild(quantity);
+  listContainer.appendChild(shoppingElement);
 
-    // create user for the list and add from login
-    const user = document.createElement("span");
-    user.classList.add("user");
-    user.innerHTML = `${userName}`;
-    li.appendChild(user);
+  saveData(itemBox.value, quantityBox.value, userName);
 
-    // create close "X" to remove the selected li from the list
-    close = document.createElement("span");
-    close.classList.add("close");
-    close.innerHTML = "&#215;";
-    li.appendChild(close);
-
-    // update all items
-    listContainer.appendChild(li);
-  }
-  // reset the inputs, return focus to the first box and run savedata function
   itemBox.value = "";
   quantityBox.value = "";
   itemBox.focus();
-  saveData();
 }
+
+// Function to render existing items from Firebase
+const renderList = () => {
+  // Listen for initial data once
+  onValue(
+    shoppingListRef,
+    (snapshot) => {
+      const data = snapshot.val();
+
+      if (data) {
+        listContainer.innerHTML = ""; // Clear existing list
+
+        Object.keys(items).forEach((key) => {
+          const listItem = data[key];
+          const { item, quantity, user } = listItem;
+
+          const listElement = createShoppingListElement(item, quantity, user);
+          listContainer.appendChild(listElement);
+        });
+      } else {
+        console.log("No items found in the database.");
+      }
+    },
+    {
+      onlyOnce: true, // Listen for initial data only once
+    }
+  );
+};
+
+// Call renderList when the page loads
+document.addEventListener("DOMContentLoaded", () => {
+  renderList();
+});
+
+// old code left for reference. will be removed if everything works correctly
+
+// // function to add the items to the list
+// function addTask() {
+//   const userName = getUserName();
+
+//   if (itemBox.value === "" || quantityBox.value === "") {
+//     alert("Please enter the missing item or quantity");
+//     return;
+//   }
+
+//   // create li for future list items
+//   const li = document.createElement("li");
+
+//   // create item for the list and add
+//   const item = document.createElement("span");
+//   item.classList.add("item");
+//   item.innerHTML = itemBox.value;
+//   li.appendChild(item);
+
+//   // create quantity for the list and add
+//   const quantity = document.createElement("span");
+//   quantity.classList.add("quantity");
+//   quantity.innerHTML = quantityBox.value;
+//   li.appendChild(quantity);
+
+//   // create user for the list and add from login
+//   const user = document.createElement("span");
+//   user.classList.add("user");
+//   user.innerHTML = `${userName}`;
+//   li.appendChild(user);
+
+//   // create close "X" to remove the selected li from the list
+//   close = document.createElement("span");
+//   close.classList.add("close");
+//   close.innerHTML = "&#215;";
+//   li.appendChild(close);
+
+//   // update all items
+//   listContainer.appendChild(li);
+
+//   // save the data added
+//   saveData(itemBox.value, quantityBox.value, userName);
+
+//   // reset the inputs, return focus to the first box
+//   itemBox.value = "";
+//   quantityBox.value = "";
+//   itemBox.focus();
+// }
 
 // event listener to add item to the list
 document.querySelector(".js-add-button").addEventListener("click", () => {
-  addTask();
+  addToList();
 });
 
 // event listener to strikethrough items that are in the cart and add the ability to remove them
@@ -271,17 +358,31 @@ listContainer.addEventListener(
 );
 
 // function to save the data to local storage
-function saveData() {
-  localStorage.setItem("data", listContainer.innerHTML);
-}
+const saveData = async (item, quantity, userName) => {
+  const database = getDatabase();
+  const newListRef = push(ref(database, "items"));
 
-// function to add items from localstorage to the list
-function showTaskList() {
-  listContainer.innerHTML = localStorage.getItem("data");
-}
+  try {
+    await set(newListRef, {
+      item: item,
+      quantity: quantity,
+      user: userName,
+    });
+    console.log("Data saved successfully");
+  } catch (error) {
+    console.error("Data not saved successfully. Error:", error);
+  }
+};
 
-// call fuction to render the list
-showTaskList();
+// old code left for reference
+
+// // function to add items from localstorage to the list
+// function showTaskList() {
+//   listContainer.innerHTML = localStorage.getItem("data");
+// }
+
+// // call fuction to render the list
+// showTaskList();
 
 // add the ability to use the enter key to add items to the cart
 document.body.addEventListener("keydown", (event) => {
@@ -290,6 +391,6 @@ document.body.addEventListener("keydown", (event) => {
     itemBox.value !== "" &&
     quantityBox.value !== ""
   ) {
-    addTask();
+    addToList();
   }
 });
