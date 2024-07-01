@@ -1,55 +1,187 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-app.js";
+import {
+  getDatabase,
+  ref,
+  push,
+  onChildAdded,
+  remove,
+  child,
+} from "https://www.gstatic.com/firebasejs/9.6.7/firebase-database.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+} from "https://www.gstatic.com/firebasejs/9.6.7/firebase-auth.js";
+import {
+  getFirestore,
+  collection,
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+} from "https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore.js";
+
+// Initialize Firebase with Realtime Database URL
+const firebaseConfig = {
+  apiKey: "AIzaSyBpKsDGhucKO_QbNgjXG3vX1vuduYl8xy4",
+  authDomain: "shopping-list-e939f.firebaseapp.com",
+  databaseURL: "https://shopping-list-e939f-default-rtdb.firebaseio.com/",
+  projectId: "shopping-list-e939f",
+  storageBucket: "shopping-list-e939f.appspot.com",
+};
+
+// Setup Firebase constants
+const firebaseApp = initializeApp(firebaseConfig);
+const firestore = getFirestore(firebaseApp);
+const database = getDatabase(firebaseApp);
+const shoppingListRef = ref(database, "shoppingList");
+
+// Setup JS constants
 const itemBox = document.getElementById("item-box");
 const quantityBox = document.getElementById("quantity-box");
 const listContainer = document.getElementById("list-container");
 
-// get userName from login for use in other functions
-const getUserName = () => {
-  const email = document.getElementById("email").value;
-  return email === "cpt.bob@gmail.com" ? "CptBob" : null;
+// get userName from login for use in other functions and check for userdoc
+const getUserName = async (email, password) => {
+  const auth = getAuth();
+
+  try {
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+    const user = userCredential.user;
+
+    try {
+      const userDoc = await getDoc(doc(firestore, "users", user.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const userName = userData.user;
+        return userName;
+      } else {
+        throw new Error("User document does not exist");
+      }
+    } catch (error) {
+      console.error("Error fetching the username:", error);
+      throw error;
+    }
+  } catch (error) {
+    console.error("Login error", error.message);
+    throw error;
+  }
 };
 
-// function to run handlelogin function onclick and allow the logout link to be seen
-function login() {
-  handleLogin();
+// Handle login using credentials
+const login = () => {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  getUserName(email, password)
+    .then((userName) => {
+      if (userName) {
+        handleLogin(userName);
+      } else {
+        alert("Unknown User");
+      }
+    })
+    .catch((error) => {
+      alert("Login failed. Please check your credentials.");
+    });
+};
+
+// handle changes to the HTML on login
+const handleLogin = (userName) => {
   const loginBox = document.getElementById("login-box");
+  const user = document.getElementById("user-name");
   const login = document.getElementById("login-link");
   const logout = document.getElementById("logout-link");
-  // const userName = getUserName();
+
+  console.log("Logged in as:", userName);
+  user.innerHTML = `${userName}`;
+  user.classList.add("show");
 
   loginBox.classList.toggle("show");
   logout.classList.toggle("show");
   login.classList.toggle("hide");
-}
+};
 
-// function to set username to null, change the user back to the login link and hide the logout link
-function logout() {
-  const login = document.getElementById("login-link");
-  const logout = document.getElementById("logout-link");
-  const user = document.getElementById("user-name");
-  user.innerHTML = "";
-  logout.classList.toggle("show");
-  login.classList.toggle("hide");
-  user.classList.toggle("show");
-}
-
-// function to set the username and show it in the HTML
-function handleLogin() {
-  const user = document.getElementById("user-name");
-  const userName = getUserName();
-
-  if (userName) {
-    console.log(userName);
-    user.innerHTML = `${userName}`;
-    user.classList.toggle("show");
-  } else {
-    alert("Unkown User");
-  }
-}
-
-// event listeners for login/logout functions
+// Event listener for login button
 document.querySelector(".js-login-button").addEventListener("click", () => {
   login();
 });
+
+// handle logout of user
+const logout = () => {
+  const login = document.getElementById("login-link");
+  const logout = document.getElementById("logout-link");
+  const user = document.getElementById("user-name");
+
+  user.innerHTML = "";
+  user.classList.toggle("show");
+
+  logout.classList.toggle("show");
+  login.classList.toggle("hide");
+
+  const auth = getAuth();
+  auth
+    .signOut()
+    .then(() => {
+      console.log("User successfully signed out");
+    })
+    .catch((error) => {
+      console.error("Error signing out:", error.message);
+    });
+};
+
+// Older code left for reference.  Will clear after everything works
+
+// function to run handlelogin function onclick and allow the logout link to be seen
+// function login() {
+//   handleLogin();
+//   const loginBox = document.getElementById("login-box");
+//   const login = document.getElementById("login-link");
+//   const logout = document.getElementById("logout-link");
+
+//   loginBox.classList.toggle("show");
+//   logout.classList.toggle("show");
+//   login.classList.toggle("hide");
+// }
+
+// // function to set username to null, change the user back to the login link and hide the logout link
+// function logout() {
+//   const login = document.getElementById("login-link");
+//   const logout = document.getElementById("logout-link");
+//   const user = document.getElementById("user-name");
+//   user.innerHTML = "";
+//   logout.classList.toggle("show");
+//   login.classList.toggle("hide");
+//   user.classList.toggle("show");
+// }
+
+// // function to set the username and show it in the HTML
+// function handleLogin() {
+//   const user = document.getElementById("user-name");
+
+//   try {
+//     const userName = await getUserName();
+
+//     if (userName) {
+//       console.log(userName);
+//       user.innerHTML = `${userName}`;
+//       user.classList.toggle("show");
+//     } else {
+//       alert("Unkown User");
+//     }
+//   } catch (error) {
+//     alert("Login failed. Please check login credentials")
+//   }
+// }
+
+// // event listeners for login/logout functions
+// document.querySelector(".js-login-button").addEventListener("click", () => {
+//   login();
+// });
 
 document.querySelector(".js-login-link").addEventListener("click", () => {
   const loginBox = document.getElementById("login-box");
