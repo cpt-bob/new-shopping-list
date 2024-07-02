@@ -5,6 +5,7 @@ import {
   push,
   onValue,
   set,
+  remove,
 } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-database.js";
 import {
   getAuth,
@@ -13,11 +14,8 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-auth.js";
 import {
   getFirestore,
-  collection,
   doc,
-  setDoc,
   getDoc,
-  updateDoc,
 } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore.js";
 
 // Initialize Firebase with Realtime Database URL
@@ -33,40 +31,27 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const firestore = getFirestore(firebaseApp);
 const database = getDatabase(firebaseApp);
-const shoppingListRef = ref(database, "shoppingList");
+//const shoppingListRef = ref(database, "shoppingList");
 
 // Setup JS constants
 const itemBox = document.getElementById("item-box");
 const quantityBox = document.getElementById("quantity-box");
 const listContainer = document.getElementById("list-container");
 
-// get userName from login for use in other functions and check for userdoc
-const getUserName = async (email, password) => {
-  const auth = getAuth();
+// Function to get user's username from Firestore based on UID
+const getUserName = async (userId) => {
+  const userDocRef = doc(firestore, "users", userId);
 
   try {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-    const user = userCredential.user;
-
-    try {
-      const userDoc = await getDoc(doc(firestore, "users", user.uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        const userName = userData.user;
-        return userName;
-      } else {
-        throw new Error("User document does not exist");
-      }
-    } catch (error) {
-      console.error("Error fetching the username:", error);
-      throw error;
+    const userDocSnapshot = await getDoc(userDocRef);
+    if (userDocSnapshot.exists()) {
+      const userData = userDocSnapshot.data();
+      return userData.user;
+    } else {
+      throw new Error("User document does not exist");
     }
   } catch (error) {
-    console.error("Login error:", error.message);
+    console.error("Error fetching user document:", error);
     throw error;
   }
 };
@@ -75,16 +60,29 @@ const getUserName = async (email, password) => {
 const login = () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
+  const auth = getAuth();
 
-  getUserName(email, password)
-    .then((userName) => {
-      if (userName) {
-        handleLogin(userName);
-      } else {
-        alert("Unknown User");
-      }
+  signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      const userId = userCredential.user.uid; // Get the user's UID
+      console.log("User UID:", userId); // Verify UID matches user uid
+
+      getUserName(userId)
+        .then((userName) => {
+          if (userName) {
+            console.log(userName); // check userName works correctly
+            handleLogin(userName);
+          } else {
+            alert("Unknown User");
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching username:", error);
+          alert("Unknown User");
+        });
     })
     .catch((error) => {
+      console.error("Login error:", error.message);
       alert("Login failed. Please check your credentials.");
     });
 };
@@ -96,7 +94,7 @@ const handleLogin = (userName) => {
   const login = document.getElementById("login-link");
   const logout = document.getElementById("logout-link");
 
-  console.log("Logged in as:", userName);
+  console.log("Logged in as:", userName); // check userName works
   user.innerHTML = `${userName}`;
   user.classList.add("show");
 
@@ -172,41 +170,48 @@ const createShoppingListElement = (item, quantity, userName) => {
   return li;
 };
 
-function addToList() {
-  const userName = getUserName();
+const addToList = async () => {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-  if (itemBox.value === "" || quantityBox.value === "") {
-    alert("Please enter the missing item or quantity");
-    return;
+  try {
+    const userName = await getUserName(getAuth().currentUser.uid);
+
+    if (itemBox.value === "" || quantityBox.value === "") {
+      alert("Please enter the missing item or quantity");
+      return;
+    }
+
+    const shoppingElement = createShoppingListElement(
+      itemBox.value,
+      quantityBox.value,
+      userName
+    );
+
+    listContainer.appendChild(shoppingElement);
+
+    await saveData(itemBox.value, quantityBox.value, getAuth().currentUser.uid);
+
+    itemBox.value = "";
+    quantityBox.value = "";
+    itemBox.focus();
+  } catch (error) {
+    console.error("Error adding item to list:", error);
+    alert("Failed to add item to list. Please try again");
   }
-
-  const shoppingElement = createShoppingListElement(
-    itemBox.value,
-    quantityBox.value,
-    userName
-  );
-
-  listContainer.appendChild(shoppingElement);
-
-  saveData(itemBox.value, quantityBox.value, userName);
-
-  itemBox.value = "";
-  quantityBox.value = "";
-  itemBox.focus();
-}
+};
 
 // Function to render existing items from Firebase
 const renderList = () => {
   // Listen for initial data once
-  onValue(shoppingListRef, (snapshot) => {
-    const data = snapshot.val();
+  onValue(ref(database, "items"), (snapshot) => {
+    const items = snapshot.val();
 
-    if (data) {
+    if (items) {
       listContainer.innerHTML = ""; // Clear existing list
 
       Object.keys(items).forEach((key) => {
-        const listItem = data[key];
-        const { item, quantity, user } = listItem;
+        const { item, quantity, user } = items[key];
 
         const listElement = createShoppingListElement(item, quantity, user);
         listContainer.appendChild(listElement);
@@ -230,7 +235,7 @@ document.querySelector(".js-add-button").addEventListener("click", () => {
 // event listener to strikethrough items that are in the cart and add the ability to remove them
 listContainer.addEventListener(
   "click",
-  function (event) {
+  async function (event) {
     // adds the ability to strikethrough no matter where you click on the list item
     if (
       event.target.tagName === "LI" ||
@@ -241,27 +246,41 @@ listContainer.addEventListener(
       const li = event.target.closest("li");
       if (li) {
         li.classList.toggle("checked");
-        saveData();
+        //saveData();
       }
       // remove item from list on click of close x
     } else if (event.target.classList.contains("close")) {
       event.target.parentElement.remove();
-      saveData();
+      const itemId = event.target.parentElement.dataset.itemId;
+      await removeItem(itemId);
+      //saveData();
     }
   },
   false
 );
 
+// function to remove item from the database
+const removeItem = async (itemId) => {
+  try {
+    await remove(ref(database, `items/${itemId}`));
+    console.log("Item removed from the database successfully");
+  } catch (error) {
+    console.error("Error removing item from the database:", error);
+  }
+};
+
 // function to save the data to local storage
-const saveData = async (item, quantity, userName) => {
-  const database = getDatabase();
+const saveData = async (item, quantity, userId) => {
   const newListRef = push(ref(database, "items"));
 
   try {
+    const newItemRef = newListRef.key;
+
     await set(newListRef, {
       item: item,
       quantity: quantity,
-      user: userName,
+      user: userId,
+      itemId: newItemRef,
     });
     console.log("Data saved successfully");
   } catch (error) {
