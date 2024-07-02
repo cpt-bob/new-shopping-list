@@ -66,7 +66,7 @@ const getUserName = async (email, password) => {
       throw error;
     }
   } catch (error) {
-    console.error("Login error", error.message);
+    console.error("Login error:", error.message);
     throw error;
   }
 };
@@ -198,29 +198,23 @@ function addToList() {
 // Function to render existing items from Firebase
 const renderList = () => {
   // Listen for initial data once
-  onValue(
-    shoppingListRef,
-    (snapshot) => {
-      const data = snapshot.val();
+  onValue(shoppingListRef, (snapshot) => {
+    const data = snapshot.val();
 
-      if (data) {
-        listContainer.innerHTML = ""; // Clear existing list
+    if (data) {
+      listContainer.innerHTML = ""; // Clear existing list
 
-        Object.keys(items).forEach((key) => {
-          const listItem = data[key];
-          const { item, quantity, user } = listItem;
+      Object.keys(items).forEach((key) => {
+        const listItem = data[key];
+        const { item, quantity, user } = listItem;
 
-          const listElement = createShoppingListElement(item, quantity, user);
-          listContainer.appendChild(listElement);
-        });
-      } else {
-        console.log("No items found in the database.");
-      }
-    },
-    {
-      onlyOnce: true, // Listen for initial data only once
+        const listElement = createShoppingListElement(item, quantity, user);
+        listContainer.appendChild(listElement);
+      });
+    } else {
+      console.log("No items found in the database.");
     }
-  );
+  });
 };
 
 // Call renderList when the page loads
