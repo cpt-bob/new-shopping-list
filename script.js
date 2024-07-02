@@ -133,55 +133,6 @@ const logout = () => {
     });
 };
 
-// Older code left for reference.  Will clear after everything works
-
-// function to run handlelogin function onclick and allow the logout link to be seen
-// function login() {
-//   handleLogin();
-//   const loginBox = document.getElementById("login-box");
-//   const login = document.getElementById("login-link");
-//   const logout = document.getElementById("logout-link");
-
-//   loginBox.classList.toggle("show");
-//   logout.classList.toggle("show");
-//   login.classList.toggle("hide");
-// }
-
-// // function to set username to null, change the user back to the login link and hide the logout link
-// function logout() {
-//   const login = document.getElementById("login-link");
-//   const logout = document.getElementById("logout-link");
-//   const user = document.getElementById("user-name");
-//   user.innerHTML = "";
-//   logout.classList.toggle("show");
-//   login.classList.toggle("hide");
-//   user.classList.toggle("show");
-// }
-
-// // function to set the username and show it in the HTML
-// function handleLogin() {
-//   const user = document.getElementById("user-name");
-
-//   try {
-//     const userName = await getUserName();
-
-//     if (userName) {
-//       console.log(userName);
-//       user.innerHTML = `${userName}`;
-//       user.classList.toggle("show");
-//     } else {
-//       alert("Unkown User");
-//     }
-//   } catch (error) {
-//     alert("Login failed. Please check login credentials")
-//   }
-// }
-
-// // event listeners for login/logout functions
-// document.querySelector(".js-login-button").addEventListener("click", () => {
-//   login();
-// });
-
 // event listener for the login popup
 document.querySelector(".js-login-link").addEventListener("click", () => {
   const loginBox = document.getElementById("login-box");
@@ -277,6 +228,113 @@ document.addEventListener("DOMContentLoaded", () => {
   renderList();
 });
 
+// event listener to add item to the list
+document.querySelector(".js-add-button").addEventListener("click", () => {
+  addToList();
+});
+
+// event listener to strikethrough items that are in the cart and add the ability to remove them
+listContainer.addEventListener(
+  "click",
+  function (event) {
+    // adds the ability to strikethrough no matter where you click on the list item
+    if (
+      event.target.tagName === "LI" ||
+      event.target.classList.contains("item") ||
+      event.target.classList.contains("quantity") ||
+      event.target.classList.contains("user")
+    ) {
+      const li = event.target.closest("li");
+      if (li) {
+        li.classList.toggle("checked");
+        saveData();
+      }
+      // remove item from list on click of close x
+    } else if (event.target.classList.contains("close")) {
+      event.target.parentElement.remove();
+      saveData();
+    }
+  },
+  false
+);
+
+// function to save the data to local storage
+const saveData = async (item, quantity, userName) => {
+  const database = getDatabase();
+  const newListRef = push(ref(database, "items"));
+
+  try {
+    await set(newListRef, {
+      item: item,
+      quantity: quantity,
+      user: userName,
+    });
+    console.log("Data saved successfully");
+  } catch (error) {
+    console.error("Data not saved successfully. Error:", error);
+  }
+};
+
+// add the ability to use the enter key to add items to the cart
+document.body.addEventListener("keydown", (event) => {
+  if (
+    event.key === "Enter" &&
+    itemBox.value !== "" &&
+    quantityBox.value !== ""
+  ) {
+    addToList();
+  }
+});
+
+// Older code left for reference.  Will clear after everything works
+
+// function to run handlelogin function onclick and allow the logout link to be seen
+// function login() {
+//   handleLogin();
+//   const loginBox = document.getElementById("login-box");
+//   const login = document.getElementById("login-link");
+//   const logout = document.getElementById("logout-link");
+
+//   loginBox.classList.toggle("show");
+//   logout.classList.toggle("show");
+//   login.classList.toggle("hide");
+// }
+
+// // function to set username to null, change the user back to the login link and hide the logout link
+// function logout() {
+//   const login = document.getElementById("login-link");
+//   const logout = document.getElementById("logout-link");
+//   const user = document.getElementById("user-name");
+//   user.innerHTML = "";
+//   logout.classList.toggle("show");
+//   login.classList.toggle("hide");
+//   user.classList.toggle("show");
+// }
+
+// // function to set the username and show it in the HTML
+// function handleLogin() {
+//   const user = document.getElementById("user-name");
+
+//   try {
+//     const userName = await getUserName();
+
+//     if (userName) {
+//       console.log(userName);
+//       user.innerHTML = `${userName}`;
+//       user.classList.toggle("show");
+//     } else {
+//       alert("Unkown User");
+//     }
+//   } catch (error) {
+//     alert("Login failed. Please check login credentials")
+//   }
+// }
+
+// // event listeners for login/logout functions
+// document.querySelector(".js-login-button").addEventListener("click", () => {
+//   login();
+// });
+
 // old code left for reference. will be removed if everything works correctly
 
 // // function to add the items to the list
@@ -327,53 +385,6 @@ document.addEventListener("DOMContentLoaded", () => {
 //   itemBox.focus();
 // }
 
-// event listener to add item to the list
-document.querySelector(".js-add-button").addEventListener("click", () => {
-  addToList();
-});
-
-// event listener to strikethrough items that are in the cart and add the ability to remove them
-listContainer.addEventListener(
-  "click",
-  function (event) {
-    // adds the ability to strikethrough no matter where you click on the list item
-    if (
-      event.target.tagName === "LI" ||
-      event.target.classList.contains("item") ||
-      event.target.classList.contains("quantity") ||
-      event.target.classList.contains("user")
-    ) {
-      const li = event.target.closest("li");
-      if (li) {
-        li.classList.toggle("checked");
-        saveData();
-      }
-      // remove item from list on click of close x
-    } else if (event.target.classList.contains("close")) {
-      event.target.parentElement.remove();
-      saveData();
-    }
-  },
-  false
-);
-
-// function to save the data to local storage
-const saveData = async (item, quantity, userName) => {
-  const database = getDatabase();
-  const newListRef = push(ref(database, "items"));
-
-  try {
-    await set(newListRef, {
-      item: item,
-      quantity: quantity,
-      user: userName,
-    });
-    console.log("Data saved successfully");
-  } catch (error) {
-    console.error("Data not saved successfully. Error:", error);
-  }
-};
-
 // old code left for reference
 
 // // function to add items from localstorage to the list
@@ -383,14 +394,3 @@ const saveData = async (item, quantity, userName) => {
 
 // // call fuction to render the list
 // showTaskList();
-
-// add the ability to use the enter key to add items to the cart
-document.body.addEventListener("keydown", (event) => {
-  if (
-    event.key === "Enter" &&
-    itemBox.value !== "" &&
-    quantityBox.value !== ""
-  ) {
-    addToList();
-  }
-});
