@@ -72,6 +72,7 @@ const login = () => {
           if (userName) {
             console.log(userName); // check userName works correctly
             handleLogin(userName);
+            renderList();
           } else {
             alert("Unknown User");
           }
