@@ -86,6 +86,7 @@ const login = () => {
       console.error("Login error:", error.message);
       alert("Login failed. Please check your credentials.");
     });
+  itemBox.focus();
 };
 
 // handle changes to the HTML on login
@@ -288,13 +289,22 @@ const saveData = async (item, quantity, userName) => {
   }
 };
 
-// add the ability to use the enter key to add items to the cart
+// add the ability to use the enter key to add items to the cart after login
 document.body.addEventListener("keydown", (event) => {
   if (
     event.key === "Enter" &&
+    (document.activeElement === itemBox ||
+      document.activeElement === quantityBox) &&
     itemBox.value !== "" &&
     quantityBox.value !== ""
   ) {
     addToList();
+  }
+});
+
+// add the ability to use the enter key to login
+document.getElementById("password").addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && email.value !== "" && password.value !== "") {
+    login();
   }
 });
