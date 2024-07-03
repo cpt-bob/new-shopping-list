@@ -215,11 +215,12 @@ const renderList = async () => {
           listContainer.appendChild(listElement);
         });
       } else {
-        console.log("No items found in the database.");
+        listContainer.innerHTML =
+          "<p class='empty-list'>Shopping List is Empty</p>";
       }
     });
   } catch (error) {
-    console.error("Error fetching username:", error);
+    console.error("Error rendering list", error);
     alert("Failed to render.  Please try again.");
   }
 };

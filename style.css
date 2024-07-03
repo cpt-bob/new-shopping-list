@@ -57,6 +57,7 @@ footer a {
   margin-bottom: 20px;
   color: black;
 }
+
 .login-link,
 .logout-link {
   color: white;
@@ -225,4 +226,11 @@ li.checked .close {
   display: inline-flex;
   color: white;
   z-index: 1;
+}
+
+.empty-list {
+  font-size: 20px;
+  color: aliceblue;
+  text-align: center;
+  margin-top: 20px;
 }
