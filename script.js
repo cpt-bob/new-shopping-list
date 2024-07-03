@@ -145,8 +145,9 @@ document.querySelector(".js-logout-link").addEventListener("click", () => {
   logout();
 });
 
-const createShoppingListElement = (item, quantity, userName) => {
+const createShoppingListElement = (item, quantity, userName, newItemRef) => {
   const li = document.createElement("li");
+  li.dataset.itemId = newItemRef;
 
   const itemElement = document.createElement("span");
   itemElement.classList.add("item");
@@ -172,26 +173,16 @@ const createShoppingListElement = (item, quantity, userName) => {
 };
 
 const addToList = async () => {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
   try {
-    const userName = await getUserName(getAuth().currentUser.uid);
+    const userId = getAuth().currentUser.uid;
+    const userName = await getUserName(userId);
 
     if (itemBox.value === "" || quantityBox.value === "") {
       alert("Please enter the missing item or quantity");
       return;
     }
 
-    const shoppingElement = createShoppingListElement(
-      itemBox.value,
-      quantityBox.value,
-      userName
-    );
-
-    listContainer.appendChild(shoppingElement);
-
-    await saveData(itemBox.value, quantityBox.value, getAuth().currentUser.uid);
+    await saveData(itemBox.value, quantityBox.value, userName);
 
     itemBox.value = "";
     quantityBox.value = "";
@@ -203,30 +194,39 @@ const addToList = async () => {
 };
 
 // Function to render existing items from Firebase
-const renderList = () => {
-  // Listen for initial data once
-  onValue(ref(database, "items"), (snapshot) => {
-    const items = snapshot.val();
+const renderList = async () => {
+  try {
+    onValue(ref(database, "items"), (snapshot) => {
+      const items = snapshot.val();
 
-    if (items) {
-      listContainer.innerHTML = ""; // Clear existing list
+      if (items) {
+        listContainer.innerHTML = ""; // Clear existing list
 
-      Object.keys(items).forEach((key) => {
-        const { item, quantity, user } = items[key];
+        Object.keys(items).forEach((key) => {
+          const { item, quantity, user, itemId } = items[key];
 
-        const listElement = createShoppingListElement(item, quantity, user);
-        listContainer.appendChild(listElement);
-      });
-    } else {
-      console.log("No items found in the database.");
-    }
-  });
+          const listElement = createShoppingListElement(
+            item,
+            quantity,
+            user,
+            itemId
+          );
+          listContainer.appendChild(listElement);
+        });
+      } else {
+        console.log("No items found in the database.");
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching username:", error);
+    alert("Failed to render.  Please try again.");
+  }
 };
 
 // Call renderList when the page loads
-document.addEventListener("DOMContentLoaded", () => {
-  renderList();
-});
+// document.addEventListener("DOMContentLoaded", () => {
+//   renderList();
+// });
 
 // event listener to add item to the list
 document.querySelector(".js-add-button").addEventListener("click", () => {
@@ -247,14 +247,12 @@ listContainer.addEventListener(
       const li = event.target.closest("li");
       if (li) {
         li.classList.toggle("checked");
-        //saveData();
       }
       // remove item from list on click of close x
     } else if (event.target.classList.contains("close")) {
       event.target.parentElement.remove();
       const itemId = event.target.parentElement.dataset.itemId;
       await removeItem(itemId);
-      //saveData();
     }
   },
   false
@@ -271,7 +269,7 @@ const removeItem = async (itemId) => {
 };
 
 // function to save the data to local storage
-const saveData = async (item, quantity, userId) => {
+const saveData = async (item, quantity, userName) => {
   const newListRef = push(ref(database, "items"));
 
   try {
@@ -280,10 +278,11 @@ const saveData = async (item, quantity, userId) => {
     await set(newListRef, {
       item: item,
       quantity: quantity,
-      user: userId,
+      user: userName,
       itemId: newItemRef,
     });
     console.log("Data saved successfully");
+    return newItemRef;
   } catch (error) {
     console.error("Data not saved successfully. Error:", error);
   }
@@ -299,112 +298,3 @@ document.body.addEventListener("keydown", (event) => {
     addToList();
   }
 });
-
-// Older code left for reference.  Will clear after everything works
-
-// function to run handlelogin function onclick and allow the logout link to be seen
-// function login() {
-//   handleLogin();
-//   const loginBox = document.getElementById("login-box");
-//   const login = document.getElementById("login-link");
-//   const logout = document.getElementById("logout-link");
-
-//   loginBox.classList.toggle("show");
-//   logout.classList.toggle("show");
-//   login.classList.toggle("hide");
-// }
-
-// // function to set username to null, change the user back to the login link and hide the logout link
-// function logout() {
-//   const login = document.getElementById("login-link");
-//   const logout = document.getElementById("logout-link");
-//   const user = document.getElementById("user-name");
-//   user.innerHTML = "";
-//   logout.classList.toggle("show");
-//   login.classList.toggle("hide");
-//   user.classList.toggle("show");
-// }
-
-// // function to set the username and show it in the HTML
-// function handleLogin() {
-//   const user = document.getElementById("user-name");
-
-//   try {
-//     const userName = await getUserName();
-
-//     if (userName) {
-//       console.log(userName);
-//       user.innerHTML = `${userName}`;
-//       user.classList.toggle("show");
-//     } else {
-//       alert("Unkown User");
-//     }
-//   } catch (error) {
-//     alert("Login failed. Please check login credentials")
-//   }
-// }
-
-// // event listeners for login/logout functions
-// document.querySelector(".js-login-button").addEventListener("click", () => {
-//   login();
-// });
-
-// old code left for reference. will be removed if everything works correctly
-
-// // function to add the items to the list
-// function addTask() {
-//   const userName = getUserName();
-
-//   if (itemBox.value === "" || quantityBox.value === "") {
-//     alert("Please enter the missing item or quantity");
-//     return;
-//   }
-
-//   // create li for future list items
-//   const li = document.createElement("li");
-
-//   // create item for the list and add
-//   const item = document.createElement("span");
-//   item.classList.add("item");
-//   item.innerHTML = itemBox.value;
-//   li.appendChild(item);
-
-//   // create quantity for the list and add
-//   const quantity = document.createElement("span");
-//   quantity.classList.add("quantity");
-//   quantity.innerHTML = quantityBox.value;
-//   li.appendChild(quantity);
-
-//   // create user for the list and add from login
-//   const user = document.createElement("span");
-//   user.classList.add("user");
-//   user.innerHTML = `${userName}`;
-//   li.appendChild(user);
-
-//   // create close "X" to remove the selected li from the list
-//   close = document.createElement("span");
-//   close.classList.add("close");
-//   close.innerHTML = "&#215;";
-//   li.appendChild(close);
-
-//   // update all items
-//   listContainer.appendChild(li);
-
-//   // save the data added
-//   saveData(itemBox.value, quantityBox.value, userName);
-
-//   // reset the inputs, return focus to the first box
-//   itemBox.value = "";
-//   quantityBox.value = "";
-//   itemBox.focus();
-// }
-
-// old code left for reference
-
-// // function to add items from localstorage to the list
-// function showTaskList() {
-//   listContainer.innerHTML = localStorage.getItem("data");
-// }
-
-// // call fuction to render the list
-// showTaskList();
